@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 5e-06
+  base_learning_rate: 0.5e-04
   target: ldm.models.diffusion.ddpm.LatentDiffusion
   params:
     linear_start: 0.00085
@@ -18,7 +18,7 @@ model:
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler
       params:
-        warm_up_steps: [ 2000 ] # NOTE for resuming. use 10000 if starting from scratch
+        warm_up_steps: [ 1000 ] # NOTE for resuming. use 10000 if starting from scratch
         cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
         f_start: [ 1.e-6 ]
         f_max: [ 1. ]
@@ -66,14 +66,17 @@ model:
           target: torch.nn.Identity
 
     cond_stage_config:
-      target: ldm.modules.encoders.modules.FaceClipEncoder
+      target: ldm.modules.encoders.modules.FrozenFaceEncoder
+      params:
+        model_path: model_ir_se50.pth
+        augment: true
 
 
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 2
-    num_workers: 2
+    batch_size: 8
+    num_workers: 4
     num_val_workers: 0 # Avoid a weird val dataloader issue
     train:
       target: ldm.data.simple.FolderData
@@ -98,11 +101,11 @@ data:
             interpolation: 3
 
 lightning:
-  find_unused_parameters: true
+  find_unused_parameters: False
 
   modelcheckpoint:
     params:
-      every_n_train_steps: 5000
+      every_n_train_steps: 2000
       save_top_k: -1
       monitor: null
 
@@ -116,7 +119,7 @@ lightning:
         log_first_step: True
         log_all_val: False
         log_images_kwargs:
-          use_ema_scope: False
+          use_ema_scope: True
           inpaint: False
           plot_progressive_rows: False
           plot_diffusion_rows: False

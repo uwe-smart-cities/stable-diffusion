@@ -66,14 +66,14 @@ model:
           target: torch.nn.Identity
 
     cond_stage_config:
-      target: ldm.modules.encoders.modules.FaceClipEncoder
+      target: ldm.modules.encoders.modules.FaceIdClipEncoder
 
 
 data:
   target: main.DataModuleFromConfig
   params:
-    batch_size: 2
-    num_workers: 2
+    batch_size: 4
+    num_workers: 4
     num_val_workers: 0 # Avoid a weird val dataloader issue
     train:
       target: ldm.data.simple.FolderData
